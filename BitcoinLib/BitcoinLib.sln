@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitcoinLib", "BitcoinLib\BitcoinLib.fsproj", "{206350C6-0019-489F-873F-ADAE4FCF50DF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{206350C6-0019-489F-873F-ADAE4FCF50DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{206350C6-0019-489F-873F-ADAE4FCF50DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{206350C6-0019-489F-873F-ADAE4FCF50DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{206350C6-0019-489F-873F-ADAE4FCF50DF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D21234D0-2EC8-4E43-B649-15F2F0B3C078}
+	EndGlobalSection
+EndGlobal
