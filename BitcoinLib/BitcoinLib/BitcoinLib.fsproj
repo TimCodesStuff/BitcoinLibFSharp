@@ -42,7 +42,6 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <None Include="Script.fsx" />
     <Content Include="packages.config" />
     <Compile Include="Encoding.fs" />
     <Compile Include="Crypto.fs" />
