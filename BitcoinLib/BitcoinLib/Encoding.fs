@@ -25,3 +25,21 @@ let ByteArrayToBigInt (array : byte[]) =
             buildBigInt bi arrayTail
 
     buildBigInt (bigint 0) array
+
+// Base 58 contains no 0, O, l, or I.
+let private Base58CharSet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+let Base58Encode (array : byte[]) =
+    let arrayAsBigInt = ByteArrayToBigInt array
+
+    let rec encode (number : bigint) (base58Encoded : string) =
+        if number = bigint(0) then
+            base58Encoded
+        else
+            let charSetIndex = number % bigint(58)
+            let newChar = Base58CharSet.[int(index)]
+            let encodedString = (string)newChar + base58Encoded
+            let num = number / bigint(58)
+            encode num encodedString
+
+    encode arrayAsBigInt ""
+

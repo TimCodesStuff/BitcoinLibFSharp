@@ -45,3 +45,9 @@ type EncodingTests () =
         let actual = Encoding.ByteArrayToBigInt [| byte(24); byte(225); byte(74); byte(123); |]
         Assert.AreEqual(expected, actual)
 
+    [<TestMethod>]
+    member this.TestBase58Encode () =
+        let expected = "dtNnW"
+        let actual = Encoding.Base58Encode [| byte(24); byte(225); byte(74); byte(123); |]
+        Assert.AreEqual(expected, actual)
+
