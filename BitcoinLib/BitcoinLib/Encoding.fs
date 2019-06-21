@@ -31,15 +31,41 @@ let private Base58CharSet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrs
 let Base58Encode (array : byte[]) =
     let arrayAsBigInt = ByteArrayToBigInt array
 
+    // Base58 Encoded values can have leading zeros.
+    // These need to be saved before converting to a BigInt.
+    let rec countLeadingZeros (byteArr : byte seq) (zeroCount : int) =
+        let firstByte =  byteArr |> Seq.head
+        let tail = byteArr |> Seq.tail
+        if not (firstByte = byte(0)) then
+            zeroCount
+        else
+            let newCount = zeroCount + 1 
+            countLeadingZeros tail newCount
+
     let rec encode (number : bigint) (base58Encoded : string) =
         if number = bigint(0) then
             base58Encoded
         else
             let charSetIndex = number % bigint(58)
-            let newChar = Base58CharSet.[int(index)]
+            let newChar = Base58CharSet.[int(charSetIndex)]
             let encodedString = (string)newChar + base58Encoded
             let num = number / bigint(58)
             encode num encodedString
 
-    encode arrayAsBigInt ""
+    let base58EncodedTail = encode arrayAsBigInt ""
+    let leadingZeroCount = countLeadingZeros (array |> Array.toSeq) 0
+    let base58EncodedZeros = String.replicate leadingZeroCount "1"
+    base58EncodedZeros + base58EncodedTail
 
+let Base58StringToBigInt (base58String : string) =
+    let rec buildBigIntFromString (base58str : string) (bigInt : BigInteger) = 
+        if base58str.Length = 0 then
+            bigInt
+        else
+            let firstChar = Seq.head base58str
+            let tailChars = (Seq.tail base58str).ToString()
+            let firstCharVal = Base58CharSet.IndexOf firstChar
+            let tempBigInt = (bigInt * bigint(58)) + bigint(firstCharVal)
+            buildBigIntFromString tailChars tempBigInt
+
+    buildBigIntFromString base58String (bigint(0))

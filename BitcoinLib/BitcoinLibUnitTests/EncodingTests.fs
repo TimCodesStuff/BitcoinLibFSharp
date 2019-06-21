@@ -51,3 +51,17 @@ type EncodingTests () =
         let actual = Encoding.Base58Encode [| byte(24); byte(225); byte(74); byte(123); |]
         Assert.AreEqual(expected, actual)
 
+    [<TestMethod>]
+    member this.TestBase58EncodeWithLeadingZeros () =
+        let expected = "11dtNnW"
+        let actual = Encoding.Base58Encode [| byte(0); byte(0); byte(24); byte(225); byte(74); byte(123); |]
+        Assert.AreEqual(expected, actual)
+
+    [<TestMethod>]
+    member this.TestHexToBase58Encode () =
+        let expected = "2g82vgrZTviKG5sN1g2VM7FHgHTm16ej4gmr8ECMzab6"
+        let actual = 
+            "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
+            |> Encoding.HexStringToByteArray
+            |> Encoding.Base58Encode 
+        Assert.AreEqual(expected, actual)
