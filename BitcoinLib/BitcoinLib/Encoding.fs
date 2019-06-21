@@ -57,15 +57,36 @@ let Base58Encode (array : byte[]) =
     let base58EncodedZeros = String.replicate leadingZeroCount "1"
     base58EncodedZeros + base58EncodedTail
 
+// This function will lose the leading zeros after processing any leading 1's.
 let Base58StringToBigInt (base58String : string) =
     let rec buildBigIntFromString (base58str : string) (bigInt : BigInteger) = 
         if base58str.Length = 0 then
             bigInt
         else
             let firstChar = Seq.head base58str
-            let tailChars = (Seq.tail base58str).ToString()
+            let tailChars = Seq.tail base58str |> String.Concat
             let firstCharVal = Base58CharSet.IndexOf firstChar
             let tempBigInt = (bigInt * bigint(58)) + bigint(firstCharVal)
             buildBigIntFromString tailChars tempBigInt
 
     buildBigIntFromString base58String (bigint(0))
+
+let Base58Decode (base58Str : string) =
+    let rec convertLeadingOnesToZeros (str : string) (zeros : byte[]) =
+        let firstChar =  str |> Seq.head
+        let tail = str |> Seq.tail |> String.Concat
+        if not (firstChar = '1') then
+            zeros
+        else
+            let newArray =  Array.append [|byte(0)|] zeros
+            convertLeadingOnesToZeros tail newArray
+    
+    let byteArrayWithoutZeros = 
+        (Base58StringToBigInt base58Str).ToByteArray().Reverse() // Reverse to Big Endian
+        |> Seq.skipWhile (fun i -> i = byte(0)) // Strip sign byte
+        |> Seq.toArray
+    let leadingZeros = convertLeadingOnesToZeros base58Str [||]
+    
+    Array.append leadingZeros byteArrayWithoutZeros
+
+        
