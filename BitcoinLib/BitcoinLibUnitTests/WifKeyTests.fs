@@ -1,10 +1,22 @@
-﻿module WifAddressTests
+﻿module WifKeyTests
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
-type WifAddressTests () =
+type WifKeyTests () =
     
+    [<TestMethod>]
+    member this.TestHexToWif () =
+        let expected = "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
+        let actual = WifKey.HexToWif true true "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
+        Assert.AreEqual(expected, actual)
+
+    [<TestMethod>]
+    member this.TestWifToHex () =
+        let expected = "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
+        let actual = WifKey.WifToHex "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
+        Assert.AreEqual(expected, actual)
+
     [<TestMethod>]
     member this.TestDecomposeWifAddress () =
         let wifKey = "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
@@ -25,3 +37,4 @@ type WifAddressTests () =
         // Changed last character from "C" to "D" to make checksum invalid.
         let keyWithBadChecksum = "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3D"
         Assert.IsFalse(WifKey.IsWifChecksumValid true keyWithBadChecksum)
+
