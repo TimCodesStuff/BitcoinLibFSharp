@@ -1,9 +1,6 @@
 ﻿module EncodingTests
 
-open BitcoinLib
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open System
-
 
 [<TestClass>]
 type EncodingTests () =
@@ -79,3 +76,15 @@ type EncodingTests () =
         let actual = Encoding.Base58Decode "11dtNnW"
         let result = comparisonFunc expected actual
         Assert.AreEqual(result, 0)
+
+    [<TestMethod>]
+    member this.TestHexToWif () =
+        let expected = "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
+        let actual = Encoding.HexToWif true true "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
+        Assert.AreEqual(expected, actual)
+
+    [<TestMethod>]
+    member this.TestWifToHex () =
+        let expected = "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
+        let actual = Encoding.WifToHex "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
+        Assert.AreEqual(expected, actual)

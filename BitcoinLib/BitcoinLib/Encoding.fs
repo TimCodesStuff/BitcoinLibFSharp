@@ -1,5 +1,6 @@
 ﻿module Encoding
 
+open Crypto
 open System
 open System.Linq
 open System.Numerics
@@ -89,4 +90,16 @@ let Base58Decode (base58Str : string) =
     
     Array.append leadingZeros byteArrayWithoutZeros
 
-        
+let WifToHex (wif : string) =
+    let hex = wif |> Base58Decode |> ByteArrayToHexString false
+    // Remove first byte (network byte) and last 4 bytes (checksum)
+    hex.Substring(2, 64)
+
+let HexToWif (isMainNetwork : bool) (isCompressedPublicKey : bool) (hex : string) =
+    let hexWithNetworkByte = if isMainNetwork then "80" + hex else "EF" + hex
+    let fullHex = if isCompressedPublicKey then hexWithNetworkByte + "01" else hexWithNetworkByte
+    let doubleSha = fullHex |> HexStringToByteArray |> Crypto.Sha256 |> Crypto.Sha256
+    let checksum = (ByteArrayToHexString false doubleSha).Substring(0, 8);
+    let hexWithChecksum = fullHex + checksum
+    hexWithChecksum |> HexStringToByteArray |> Base58Encode
+    

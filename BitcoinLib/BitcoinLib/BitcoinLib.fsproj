@@ -43,8 +43,10 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Content Include="packages.config" />
-    <Compile Include="Encoding.fs" />
     <Compile Include="Crypto.fs" />
+    <Compile Include="Encoding.fs" />
+    <Compile Include="WifKey.fs" />
+    <Compile Include="BitcoinAddress.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
