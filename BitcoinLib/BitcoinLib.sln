@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitcoinLib", "BitcoinLib\BitcoinLib.fsproj", "{206350C6-0019-489F-873F-ADAE4FCF50DF}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "BitcoinLibUnitTests", "BitcoinLibUnitTests\BitcoinLibUnitTests.fsproj", "{8E886A6C-94F1-4ADF-A554-61FCF059E82C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitcoinLibUnitTests", "BitcoinLibUnitTests\BitcoinLibUnitTests.fsproj", "{8E886A6C-94F1-4ADF-A554-61FCF059E82C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitcoinLib", "BitcoinLib\BitcoinLib.fsproj", "{6477B0F0-781E-4052-B096-E2447CD44E88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{206350C6-0019-489F-873F-ADAE4FCF50DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{206350C6-0019-489F-873F-ADAE4FCF50DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{206350C6-0019-489F-873F-ADAE4FCF50DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{206350C6-0019-489F-873F-ADAE4FCF50DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8E886A6C-94F1-4ADF-A554-61FCF059E82C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8E886A6C-94F1-4ADF-A554-61FCF059E82C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E886A6C-94F1-4ADF-A554-61FCF059E82C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E886A6C-94F1-4ADF-A554-61FCF059E82C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6477B0F0-781E-4052-B096-E2447CD44E88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6477B0F0-781E-4052-B096-E2447CD44E88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6477B0F0-781E-4052-B096-E2447CD44E88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6477B0F0-781E-4052-B096-E2447CD44E88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

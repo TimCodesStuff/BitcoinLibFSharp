@@ -1,6 +1,11 @@
 ﻿module BitcoinAddress
 
+open BitcoinAddressRecord
+open Org.BouncyCastle.Crypto.Parameters
+open Org.BouncyCastle.Math
+open Org.BouncyCastle.Asn1.Sec
 open System
+open System.Linq
 open System.Security.Cryptography
 
 let GenerateRand256BitKey () =
@@ -22,3 +27,71 @@ let GenerateRandECDSACompliant256BitKey () =
             key
 
     getKeyInBounds()
+
+let GenerateFullPublicKey (publicKeyX : byte[]) (publicKeyY : byte[]) =
+    Array.append (Array.append [| byte(0x04); |] publicKeyX) publicKeyY
+
+let GenerateCompressedPublicKey (publicKeyX : byte[]) (publicKeyY : byte[]) =
+    if int(publicKeyY.[31]) % 2 = 0 then
+        Array.append [| byte(0x02) |] publicKeyX
+    else
+        Array.append [| byte(0x03) |] publicKeyX
+
+let GetSecp256k1PublicKey (privateKey : byte[]) =
+    let curve = SecNamedCurves.GetByName("secp256k1")
+    let domain = new ECDomainParameters(curve.Curve, curve.G, curve.N, curve.H)
+    let d = new BigInteger(+1, privateKey)
+    let publicKey = new ECPublicKeyParameters(domain.G.Multiply(d), domain)
+    (publicKey.Q.XCoord.GetEncoded(), publicKey.Q.YCoord.GetEncoded())
+
+let GenerateChecksum (address : byte[]) =
+    Crypto.Sha256(Crypto.Sha256(address)).Take(4).ToArray();
+
+// There are two networks, the main network and the test network.
+let GetNetworkByteValue (isMainNetwork : bool) =
+    if isMainNetwork then byte(0x00) else  byte(0x6f)
+
+let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : byte[]) =
+    let (x,y) = GetSecp256k1PublicKey privateKey
+    let compressedPublicKey = GenerateCompressedPublicKey x y
+    let shaHashedPublicKey = Crypto.Sha256 compressedPublicKey
+    let shaRipeHashedPublicKey = Crypto.RipeMD160 shaHashedPublicKey
+    
+    let payToPublicKeyAddress = Array.append [|(GetNetworkByteValue isMainNetwork)|] shaRipeHashedPublicKey
+    let payToPublicKeyAddressChecksum = GenerateChecksum payToPublicKeyAddress
+    let payToPublicKeyAddressWithChecksum = Array.append payToPublicKeyAddress payToPublicKeyAddressChecksum
+
+    let payToScriptHashAddressByte = if isMainNetwork then byte(0x05) else byte(0xc4)
+    let payToScriptHashAddress = Array.append [|payToScriptHashAddressByte|] shaRipeHashedPublicKey
+    let payToScriptHashChecksum = GenerateChecksum payToScriptHashAddress
+    let payToScriptHashWithChecksum = Array.append payToScriptHashAddress payToScriptHashChecksum
+
+    {
+        privateKey = privateKey;
+        publicKeyX = x;
+        publicKeyY = y;
+        publicKeyCompressed = compressedPublicKey;
+        publicKeySha256 = shaHashedPublicKey;
+        publicKeySha256Ripe = shaRipeHashedPublicKey;
+        isMainNetwork = isMainNetwork;
+
+        // pay to public key hash
+        p2pkh_publicKeyWithNetworkByte = payToPublicKeyAddress;
+        p2pkh_checksum = payToPublicKeyAddressChecksum;
+        p2pkh_addressWithChecksum = payToPublicKeyAddressWithChecksum;
+
+        // pay to script hash
+        p2sh_publicKeyWithNetworkByte = payToScriptHashAddress;
+        p2sh_checksum = payToScriptHashChecksum;
+        p2sh_addressWithChecksum = payToScriptHashWithChecksum;
+
+        // main entities
+        PublicKeyFull = GenerateFullPublicKey x y;
+        PrivateKeyHex = Encoding.ByteArrayToHexString false privateKey;
+        PrivateKeyWIF = WifKey.HexToWif isMainNetwork true (Encoding.ByteArrayToHexString false privateKey);
+        P2PKHAddress = Encoding.Base58Encode payToPublicKeyAddressWithChecksum;
+        P2SHAddress = Encoding.Base58Encode payToScriptHashWithChecksum;
+    }
+
+let GenerateBitcoinAddressRecordFromPrivateKeyHex (isMainNetwork : bool) (hex : string) =
+    GenerateBitcoinAddressRecord isMainNetwork (Encoding.HexStringToByteArray hex)
