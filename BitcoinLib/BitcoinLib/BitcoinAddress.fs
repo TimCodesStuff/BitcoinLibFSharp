@@ -95,3 +95,6 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
 
 let GenerateBitcoinAddressRecordFromPrivateKeyHex (isMainNetwork : bool) (hex : string) =
     GenerateBitcoinAddressRecord isMainNetwork (Encoding.HexStringToByteArray hex)
+
+let GenerateBitcoinAddressRecordFromPrivateKeyWIF (isMainNetwork : bool) (wif : string) =
+    GenerateBitcoinAddressRecord isMainNetwork (Encoding.HexStringToByteArray (WifKey.WifToHex wif))
