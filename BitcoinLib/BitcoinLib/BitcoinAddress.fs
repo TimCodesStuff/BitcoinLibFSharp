@@ -98,3 +98,7 @@ let GenerateBitcoinAddressRecordFromPrivateKeyHex (isMainNetwork : bool) (hex : 
 
 let GenerateBitcoinAddressRecordFromPrivateKeyWIF (isMainNetwork : bool) (wif : string) =
     GenerateBitcoinAddressRecord isMainNetwork (Encoding.HexStringToByteArray (WifKey.WifToHex wif))
+
+let GenerateNewRandomBitcoinAddressRecord (isMainNetwork : bool) =
+    let newKey = GenerateRandECDSACompliant256BitKey()
+    GenerateBitcoinAddressRecord isMainNetwork newKey
