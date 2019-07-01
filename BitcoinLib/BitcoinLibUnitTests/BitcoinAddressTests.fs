@@ -5,6 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 [<TestClass>]
 type BitcoinAddressTests () =
     
+    // Private key and address data come from: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
     [<TestMethod>]
     member this.TestGenerateBitcoinAddressRecordFromHex () =
         let address = BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyHex true "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
@@ -44,6 +45,7 @@ type BitcoinAddressTests () =
         let expectedPayToScriptHash = "3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f"
         Assert.AreEqual(expectedPayToScriptHash, address.P2SHAddress)
 
+    // Private key and address data come from: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
     [<TestMethod>]
     member this.TestGenerateBitcoinAddressRecordFromWif () =
         let address = BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyWIF true "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
@@ -82,3 +84,16 @@ type BitcoinAddressTests () =
         Assert.AreEqual(expectedPayToScriptHashWNetworkChecksum, (Encoding.ByteArrayToHexString false address.p2sh_addressWithChecksum))
         let expectedPayToScriptHash = "3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f"
         Assert.AreEqual(expectedPayToScriptHash, address.P2SHAddress)
+
+    // Testing address generation based on https://www.freecodecamp.org/news/how-to-create-a-bitcoin-wallet-address-from-a-private-key-eca3ddd9c05f/
+    [<TestMethod>]
+     member this.TestAddressGenerationFromCodeCampKey () =
+        let address = BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyHex true "60cf347dbc59d31c1358c8e5cf5e45b822ab85b79cb32a9f3d98184779a9efc2"
+
+        Assert.AreEqual("1e7bcc70c72770dbb72fea022e8a6d07f814d2ebe4de9ae3f7af75bf706902a7", (Encoding.ByteArrayToHexString false address.publicKeyX))
+        Assert.AreEqual("b73ff919898c836396a6b0c96812c3213b99372050853bd1678da0ead14487d7", (Encoding.ByteArrayToHexString false address.publicKeyY))
+        Assert.AreEqual("041e7bcc70c72770dbb72fea022e8a6d07f814d2ebe4de9ae3f7af75bf706902a7b73ff919898c836396a6b0c96812c3213b99372050853bd1678da0ead14487d7", (Encoding.ByteArrayToHexString false address.PublicKeyFull))
+        Assert.AreEqual("031e7bcc70c72770dbb72fea022e8a6d07f814d2ebe4de9ae3f7af75bf706902a7", (Encoding.ByteArrayToHexString false address.publicKeyCompressed))
+        Assert.AreEqual("453233600a96384bb8d73d400984117ac84d7e8b", (Encoding.ByteArrayToHexString false address.publicKeySha256Ripe))
+        Assert.AreEqual("512f43c4", (Encoding.ByteArrayToHexString false address.p2pkh_checksum))
+        Assert.AreEqual("17JsmEygbbEUEpvt4PFtYaTeSqfb9ki1F1", address.P2PKHAddress)
