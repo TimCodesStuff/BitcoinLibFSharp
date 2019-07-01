@@ -1,7 +1,5 @@
 # BitcoinLibFSharp
 
-This library is still under development.
-
 This F# library provides the ability to generate bitcoin addresses using a randomly generated private key or your own private key. Your own private key can be supplied in raw binary form, hexadecimal format, or Wallet Input Format (WIF). The library provides information about the address, including: 
 * Private Key in Hexadecimal
 * Private Key in Wallet Input Format
