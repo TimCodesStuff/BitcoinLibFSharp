@@ -36,13 +36,15 @@ type BitcoinAddressTests () =
         let expectedPayToPublicKeyHashAddress = "1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs"
         Assert.AreEqual(expectedPayToPublicKeyHashAddress, address.P2PKHAddress)
 
-        let expectedPayToScriptHashWNetwork = "05f54a5851e9372b87810a8e60cdd2e7cfd80b6e31"
-        Assert.AreEqual(expectedPayToScriptHashWNetwork, (Encoding.ByteArrayToHexString false address.p2sh_publicKeyWithNetworkByte))
-        let expectedPayToScriptHashNetworkChecksum = "09f2ae6a"
+        let expectedPayToScriptHashInitialValue = "0014f54a5851e9372b87810a8e60cdd2e7cfd80b6e31"
+        Assert.AreEqual(expectedPayToScriptHashInitialValue, (Encoding.ByteArrayToHexString false address.p2sh_init))
+        let expectedPayToScripthashWithoutChecksum = "0570b4065d87d8ba1bbf82e82227a0d04a36a57c80"
+        Assert.AreEqual(expectedPayToScripthashWithoutChecksum, (Encoding.ByteArrayToHexString false address.p2sh_addressWithoutChecksum))
+        let expectedPayToScriptHashNetworkChecksum = "e45d708e"
         Assert.AreEqual(expectedPayToScriptHashNetworkChecksum, (Encoding.ByteArrayToHexString false address.p2sh_checksum))
-        let expectedPayToScriptHashWNetworkChecksum = "05f54a5851e9372b87810a8e60cdd2e7cfd80b6e3109f2ae6a"
+        let expectedPayToScriptHashWNetworkChecksum = "0570b4065d87d8ba1bbf82e82227a0d04a36a57c80e45d708e"
         Assert.AreEqual(expectedPayToScriptHashWNetworkChecksum, (Encoding.ByteArrayToHexString false address.p2sh_addressWithChecksum))
-        let expectedPayToScriptHash = "3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f"
+        let expectedPayToScriptHash = "3BxwGNjvG4CP14tAZodgYyZ7UTjruYDyAM"
         Assert.AreEqual(expectedPayToScriptHash, address.P2SHAddress)
 
     // Private key and address data come from: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
@@ -76,18 +78,20 @@ type BitcoinAddressTests () =
         let expectedPayToPublicKeyHashAddress = "1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs"
         Assert.AreEqual(expectedPayToPublicKeyHashAddress, address.P2PKHAddress)
 
-        let expectedPayToScriptHashWNetwork = "05f54a5851e9372b87810a8e60cdd2e7cfd80b6e31"
-        Assert.AreEqual(expectedPayToScriptHashWNetwork, (Encoding.ByteArrayToHexString false address.p2sh_publicKeyWithNetworkByte))
-        let expectedPayToScriptHashNetworkChecksum = "09f2ae6a"
+        let expectedPayToScriptHashInitialValue = "0014f54a5851e9372b87810a8e60cdd2e7cfd80b6e31"
+        Assert.AreEqual(expectedPayToScriptHashInitialValue, (Encoding.ByteArrayToHexString false address.p2sh_init))
+        let expectedPayToScripthashWithoutChecksum = "0570b4065d87d8ba1bbf82e82227a0d04a36a57c80"
+        Assert.AreEqual(expectedPayToScripthashWithoutChecksum, (Encoding.ByteArrayToHexString false address.p2sh_addressWithoutChecksum))
+        let expectedPayToScriptHashNetworkChecksum = "e45d708e"
         Assert.AreEqual(expectedPayToScriptHashNetworkChecksum, (Encoding.ByteArrayToHexString false address.p2sh_checksum))
-        let expectedPayToScriptHashWNetworkChecksum = "05f54a5851e9372b87810a8e60cdd2e7cfd80b6e3109f2ae6a"
+        let expectedPayToScriptHashWNetworkChecksum = "0570b4065d87d8ba1bbf82e82227a0d04a36a57c80e45d708e"
         Assert.AreEqual(expectedPayToScriptHashWNetworkChecksum, (Encoding.ByteArrayToHexString false address.p2sh_addressWithChecksum))
-        let expectedPayToScriptHash = "3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f"
+        let expectedPayToScriptHash = "3BxwGNjvG4CP14tAZodgYyZ7UTjruYDyAM"
         Assert.AreEqual(expectedPayToScriptHash, address.P2SHAddress)
 
     // Testing address generation based on https://www.freecodecamp.org/news/how-to-create-a-bitcoin-wallet-address-from-a-private-key-eca3ddd9c05f/
     [<TestMethod>]
-     member this.TestAddressGenerationFromCodeCampKey () =
+     member this.TestP2PKHAddressGeneration () =
         let address = BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyHex true "60cf347dbc59d31c1358c8e5cf5e45b822ab85b79cb32a9f3d98184779a9efc2"
 
         Assert.AreEqual("1e7bcc70c72770dbb72fea022e8a6d07f814d2ebe4de9ae3f7af75bf706902a7", (Encoding.ByteArrayToHexString false address.publicKeyX))
@@ -97,3 +101,14 @@ type BitcoinAddressTests () =
         Assert.AreEqual("453233600a96384bb8d73d400984117ac84d7e8b", (Encoding.ByteArrayToHexString false address.publicKeySha256Ripe))
         Assert.AreEqual("512f43c4", (Encoding.ByteArrayToHexString false address.p2pkh_checksum))
         Assert.AreEqual("17JsmEygbbEUEpvt4PFtYaTeSqfb9ki1F1", address.P2PKHAddress)
+
+
+    // Testing Pay To Script Hash address generation based on https://medium.com/coinmonks/how-to-generate-a-bitcoin-address-step-by-step-9d7fcbf1ad0b
+    [<TestMethod>]
+     member this.TestP2SHAddressGeneration () =
+        let address = BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyHex true "a966eb6058f8ec9f47074a2faadd3dab42e2c60ed05bc34d39d6c0e1d32b8bdf"
+        Assert.AreEqual("023cba1f4d12d1ce0bced725373769b2262c6daa97be6a0588cfec8ce1a5f0bd09", (Encoding.ByteArrayToHexString false address.publicKeyCompressed))
+        Assert.AreEqual("051d521dcf4983772b3c1e6ef937103ebdfaa1ad77", (Encoding.ByteArrayToHexString false address.p2sh_addressWithoutChecksum))
+        Assert.AreEqual("c41d25f2", (Encoding.ByteArrayToHexString false address.p2sh_checksum))
+        Assert.AreEqual("051d521dcf4983772b3c1e6ef937103ebdfaa1ad77c41d25f2", (Encoding.ByteArrayToHexString false address.p2sh_addressWithChecksum))
+        Assert.AreEqual("34N3tf5m5rdNhW5zpTXNEJucHviFEa8KEq", address.P2SHAddress)

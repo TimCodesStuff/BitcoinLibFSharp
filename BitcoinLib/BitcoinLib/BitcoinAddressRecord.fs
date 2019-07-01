@@ -15,7 +15,8 @@ type BitcoinAddressRecord = {
     p2pkh_addressWithChecksum : byte[];
 
     // pay to script hash
-    p2sh_publicKeyWithNetworkByte : byte[];
+    p2sh_init : byte[];
+    p2sh_addressWithoutChecksum : byte[];
     p2sh_checksum : byte[];
     p2sh_addressWithChecksum : byte[];
 

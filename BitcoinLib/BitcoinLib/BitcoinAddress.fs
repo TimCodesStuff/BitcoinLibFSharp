@@ -62,9 +62,11 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
     let payToPublicKeyAddressWithChecksum = Array.append payToPublicKeyAddress payToPublicKeyAddressChecksum
 
     let payToScriptHashAddressByte = if isMainNetwork then byte(0x05) else byte(0xc4)
-    let payToScriptHashAddress = Array.append [|payToScriptHashAddressByte|] shaRipeHashedPublicKey
-    let payToScriptHashChecksum = GenerateChecksum payToScriptHashAddress
-    let payToScriptHashWithChecksum = Array.append payToScriptHashAddress payToScriptHashChecksum
+    let payToScriptHashAddressInit = Array.append [|GetNetworkByteValue isMainNetwork; byte(0x14)|] shaRipeHashedPublicKey
+    let payToScriptHash160 = payToScriptHashAddressInit |> Crypto.Sha256 |> Crypto.RipeMD160
+    let payToScriptHashWithoutChecksum = Array.append [| payToScriptHashAddressByte |] payToScriptHash160
+    let payToScriptHashChecksum = GenerateChecksum payToScriptHashWithoutChecksum
+    let payToScriptHashWithChecksum = Array.append payToScriptHashWithoutChecksum payToScriptHashChecksum
 
     {
         privateKey = privateKey;
@@ -81,7 +83,8 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
         p2pkh_addressWithChecksum = payToPublicKeyAddressWithChecksum;
 
         // pay to script hash
-        p2sh_publicKeyWithNetworkByte = payToScriptHashAddress;
+        p2sh_init = payToScriptHashAddressInit;
+        p2sh_addressWithoutChecksum = payToScriptHashWithoutChecksum;
         p2sh_checksum = payToScriptHashChecksum;
         p2sh_addressWithChecksum = payToScriptHashWithChecksum;
 
