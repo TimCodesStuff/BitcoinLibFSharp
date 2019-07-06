@@ -24,6 +24,16 @@ To generate a new address from a random private key, use the following:
     Console.WriteLine("Public Address: {0}", newAddress.P2PKHAddress)
 ```
 
+To generate an address from a Wallet Input Format key, use the following:
+```
+    let address = BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyWIF true "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
+    
+    // Outputs: Private Key: 18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725 
+    Console.WriteLine("Private Key: {0}", address.PrivateKeyHex)
+    
+    // Outputs: Public Address: 1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs
+    Console.WriteLine("Public Address: {0}", address.P2PKHAddress)
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
