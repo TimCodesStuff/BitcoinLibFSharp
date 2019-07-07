@@ -68,11 +68,12 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
     let payToScriptHashChecksum = GenerateChecksum payToScriptHashWithoutChecksum
     let payToScriptHashWithChecksum = Array.append payToScriptHashWithoutChecksum payToScriptHashChecksum
 
-    {
+    let metadata = {
         privateKey = privateKey;
         publicKeyX = x;
         publicKeyY = y;
         publicKeyCompressed = compressedPublicKey;
+        publicKeyFull = GenerateFullPublicKey x y;
         publicKeySha256 = shaHashedPublicKey;
         publicKeySha256Ripe = shaRipeHashedPublicKey;
         isMainNetwork = isMainNetwork;
@@ -87,9 +88,12 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
         p2sh_addressWithoutChecksum = payToScriptHashWithoutChecksum;
         p2sh_checksum = payToScriptHashChecksum;
         p2sh_addressWithChecksum = payToScriptHashWithChecksum;
+    }
 
-        // main entities
-        PublicKeyFull = GenerateFullPublicKey x y;
+    {
+        Metadata = metadata;
+        PublicKeyFull = metadata.publicKeyFull |> Encoding.ByteArrayToHexString false;
+        PublicKeyCompressed = compressedPublicKey |> Encoding.ByteArrayToHexString false;
         PrivateKeyHex = Encoding.ByteArrayToHexString false privateKey;
         PrivateKeyWIF = WifKey.HexToWif isMainNetwork true (Encoding.ByteArrayToHexString false privateKey);
         P2PKHAddress = Encoding.Base58Encode payToPublicKeyAddressWithChecksum;
