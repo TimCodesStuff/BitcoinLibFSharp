@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Result.fs" />
     <Compile Include="Crypto.fs" />
     <Compile Include="Encoding.fs" />
     <Compile Include="WifKey.fs" />

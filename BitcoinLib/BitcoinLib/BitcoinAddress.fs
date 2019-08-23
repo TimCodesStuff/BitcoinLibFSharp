@@ -7,6 +7,7 @@ open Org.BouncyCastle.Asn1.Sec
 open System
 open System.Linq
 open System.Security.Cryptography
+open Result
 
 let GenerateRand256BitKey () =
     let key : byte[] = Array.zeroCreate 32
@@ -52,60 +53,62 @@ let GetNetworkByteValue (isMainNetwork : bool) =
     if isMainNetwork then byte(0x00) else  byte(0x6f)
 
 let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : byte[]) =
-    let (x,y) = GetSecp256k1PublicKey privateKey
-    let compressedPublicKey = GenerateCompressedPublicKey x y
-    let shaHashedPublicKey = Crypto.Sha256 compressedPublicKey
-    let shaRipeHashedPublicKey = Crypto.RipeMD160 shaHashedPublicKey
+    result {
+        let (x,y) = GetSecp256k1PublicKey privateKey
+        let compressedPublicKey = GenerateCompressedPublicKey x y
+        let shaHashedPublicKey = Crypto.Sha256 compressedPublicKey
+        let! shaRipeHashedPublicKey = Crypto.RipeMD160 shaHashedPublicKey
     
-    let payToPublicKeyAddress = Array.append [|(GetNetworkByteValue isMainNetwork)|] shaRipeHashedPublicKey
-    let payToPublicKeyAddressChecksum = GenerateChecksum payToPublicKeyAddress
-    let payToPublicKeyAddressWithChecksum = Array.append payToPublicKeyAddress payToPublicKeyAddressChecksum
+        let payToPublicKeyAddress = Array.append [|(GetNetworkByteValue isMainNetwork)|] shaRipeHashedPublicKey
+        let payToPublicKeyAddressChecksum = GenerateChecksum payToPublicKeyAddress
+        let payToPublicKeyAddressWithChecksum = Array.append payToPublicKeyAddress payToPublicKeyAddressChecksum
 
-    let payToScriptHashAddressByte = if isMainNetwork then byte(0x05) else byte(0xc4)
-    let payToScriptHashAddressInit = Array.append [|GetNetworkByteValue isMainNetwork; byte(0x14)|] shaRipeHashedPublicKey
-    let payToScriptHash160 = payToScriptHashAddressInit |> Crypto.Sha256 |> Crypto.RipeMD160
-    let payToScriptHashWithoutChecksum = Array.append [| payToScriptHashAddressByte |] payToScriptHash160
-    let payToScriptHashChecksum = GenerateChecksum payToScriptHashWithoutChecksum
-    let payToScriptHashWithChecksum = Array.append payToScriptHashWithoutChecksum payToScriptHashChecksum
+        let payToScriptHashAddressByte = if isMainNetwork then byte(0x05) else byte(0xc4)
+        let payToScriptHashAddressInit = Array.append [|GetNetworkByteValue isMainNetwork; byte(0x14)|] shaRipeHashedPublicKey
+        let! payToScriptHash160 = payToScriptHashAddressInit |> Crypto.Sha256 |> Crypto.RipeMD160
+        let payToScriptHashWithoutChecksum = Array.append [| payToScriptHashAddressByte |] payToScriptHash160
+        let payToScriptHashChecksum = GenerateChecksum payToScriptHashWithoutChecksum
+        let payToScriptHashWithChecksum = Array.append payToScriptHashWithoutChecksum payToScriptHashChecksum
 
-    let metadata = {
-        privateKey = privateKey;
-        publicKeyX = x;
-        publicKeyY = y;
-        publicKeyCompressed = compressedPublicKey;
-        publicKeyFull = GenerateFullPublicKey x y;
-        publicKeySha256 = shaHashedPublicKey;
-        publicKeySha256Ripe = shaRipeHashedPublicKey;
-        isMainNetwork = isMainNetwork;
+        let metadata = {
+            privateKey = privateKey;
+            publicKeyX = x;
+            publicKeyY = y;
+            publicKeyCompressed = compressedPublicKey;
+            publicKeyFull = GenerateFullPublicKey x y;
+            publicKeySha256 = shaHashedPublicKey;
+            publicKeySha256Ripe = shaRipeHashedPublicKey;
+            isMainNetwork = isMainNetwork;
 
-        // pay to public key hash
-        p2pkh_publicKeyWithNetworkByte = payToPublicKeyAddress;
-        p2pkh_checksum = payToPublicKeyAddressChecksum;
-        p2pkh_addressWithChecksum = payToPublicKeyAddressWithChecksum;
+            // pay to public key hash
+            p2pkh_publicKeyWithNetworkByte = payToPublicKeyAddress;
+            p2pkh_checksum = payToPublicKeyAddressChecksum;
+            p2pkh_addressWithChecksum = payToPublicKeyAddressWithChecksum;
 
-        // pay to script hash
-        p2sh_init = payToScriptHashAddressInit;
-        p2sh_addressWithoutChecksum = payToScriptHashWithoutChecksum;
-        p2sh_checksum = payToScriptHashChecksum;
-        p2sh_addressWithChecksum = payToScriptHashWithChecksum;
+            // pay to script hash
+            p2sh_init = payToScriptHashAddressInit;
+            p2sh_addressWithoutChecksum = payToScriptHashWithoutChecksum;
+            p2sh_checksum = payToScriptHashChecksum;
+            p2sh_addressWithChecksum = payToScriptHashWithChecksum;
+        }
+
+        return {
+            Metadata = metadata;
+            PublicKeyFull = metadata.publicKeyFull |> Encoding.ByteArrayToHexString false;
+            PublicKeyCompressed = compressedPublicKey |> Encoding.ByteArrayToHexString false;
+            PrivateKeyHex = Encoding.ByteArrayToHexString false privateKey;
+            PrivateKeyWIF = WifKey.HexToWif isMainNetwork true (Encoding.ByteArrayToHexString false privateKey);
+            P2PKHAddress = Encoding.Base58Encode payToPublicKeyAddressWithChecksum;
+            P2SHAddress = Encoding.Base58Encode payToScriptHashWithChecksum;
+        }
     }
 
-    {
-        Metadata = metadata;
-        PublicKeyFull = metadata.publicKeyFull |> Encoding.ByteArrayToHexString false;
-        PublicKeyCompressed = compressedPublicKey |> Encoding.ByteArrayToHexString false;
-        PrivateKeyHex = Encoding.ByteArrayToHexString false privateKey;
-        PrivateKeyWIF = WifKey.HexToWif isMainNetwork true (Encoding.ByteArrayToHexString false privateKey);
-        P2PKHAddress = Encoding.Base58Encode payToPublicKeyAddressWithChecksum;
-        P2SHAddress = Encoding.Base58Encode payToScriptHashWithChecksum;
-    }
-
-let GenerateBitcoinAddressRecordFromPrivateKeyHex (isMainNetwork : bool) (hex : string) =
+let GenerateBitcoinAddressRecordFromPrivateKeyHex (isMainNetwork : bool) (hex : string) : Result<BitcoinAddressRecord, string> =
     GenerateBitcoinAddressRecord isMainNetwork (Encoding.HexStringToByteArray hex)
 
-let GenerateBitcoinAddressRecordFromPrivateKeyWIF (isMainNetwork : bool) (wif : string) =
+let GenerateBitcoinAddressRecordFromPrivateKeyWIF (isMainNetwork : bool) (wif : string) : Result<BitcoinAddressRecord, string> =
     GenerateBitcoinAddressRecord isMainNetwork (Encoding.HexStringToByteArray (WifKey.WifToHex wif))
 
-let GenerateNewRandomBitcoinAddressRecord (isMainNetwork : bool) =
+let GenerateNewRandomBitcoinAddressRecord (isMainNetwork : bool) : Result<BitcoinAddressRecord, string> =
     let newKey = GenerateRandECDSACompliant256BitKey()
     GenerateBitcoinAddressRecord isMainNetwork newKey
