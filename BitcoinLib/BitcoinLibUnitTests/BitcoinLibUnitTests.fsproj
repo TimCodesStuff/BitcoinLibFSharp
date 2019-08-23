@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CryptoTests.fs" />
     <Compile Include="BitcoinAddressTests.fs" />
     <Compile Include="WifKeyTests.fs" />
     <Compile Include="EncodingTests.fs" />
