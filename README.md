@@ -35,6 +35,12 @@ To generate an address from a Wallet Input Format key, use the following:
     Console.WriteLine("Public Address: {0}", address.P2PKHAddress)
 ```
 
+## Future Work
+The things I plan on implementing next include:
+1) Bech32 address support
+2) Block parsing and block chain parsing/validation
+3) Network Protocol support
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
