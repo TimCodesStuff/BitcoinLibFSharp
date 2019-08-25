@@ -1,18 +1,39 @@
 ﻿module EncodingTests
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open Result
 
 [<TestClass>]
 type EncodingTests () =
     let comparisonFunc = Array.compareWith(fun x y -> if x = y then 0 else 1)
 
     [<TestMethod>]
+    member this.TestKnownGoodHex () =
+        let knownGoodHex = "0123456789ABCDEF"
+        Encoding.HexStringToByteArray knownGoodHex
+        |> function
+        | Ok _ -> ()
+        | Error m -> Assert.Fail m
+
+    [<TestMethod>]
+    member this.TestKnownBadHex () =
+        let knownBadHex = "123456789ABCDEFG"
+        Encoding.HexStringToByteArray knownBadHex
+        |> function
+        | Ok _ -> Assert.Fail "Hex strings should not be accepted with invalid characters."
+        | Error _ -> ()
+
+    [<TestMethod>]
     member this.TestHexStringToByteArray () =
         let expected = [| byte(24); byte(225); byte(74); byte(123); byte(106); byte(48); byte(127); byte(66); byte(106); byte(148); byte(248); byte(17); byte(71); byte(1); byte(231); byte(200); byte(231); byte(116); byte(231); byte(249); byte(164); byte(126); byte(44); byte(32); byte(53); byte(219); byte(41); byte(162); byte(6); byte(50); byte(23); byte(37); |]
-        let actual = Encoding.HexStringToByteArray "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
-        let result = comparisonFunc expected actual
-        Assert.AreEqual(result, 0)
-    
+        result{
+            let! actual = Encoding.HexStringToByteArray "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
+            return comparisonFunc expected actual
+        } |> function
+        | Ok result -> Assert.AreEqual(result, 0)
+        | Error m -> Assert.Fail m
+        
+        
     [<TestMethod>]
     member this.TestByteArrayToHexString () =
         let expected = "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
@@ -30,11 +51,13 @@ type EncodingTests () =
     [<TestMethod>]
     member this.TestHexToByteToHex () =
         let expected = "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
-        let actual = 
-            expected
-            |> Encoding.HexStringToByteArray
-            |> Encoding.ByteArrayToHexString false
-        Assert.AreEqual(expected, actual)
+        result {
+            let! hexAsByte = expected |> Encoding.HexStringToByteArray
+            return  hexAsByte |> Encoding.ByteArrayToHexString false    
+        } |> function
+        | Result.Ok actual -> Assert.AreEqual(expected, actual)
+        | Result.Error m -> Assert.Fail m
+        
 
     [<TestMethod>]
     member this.TestByteArrayToBigInt () =
@@ -57,11 +80,12 @@ type EncodingTests () =
     [<TestMethod>]
     member this.TestHexToBase58Encode () =
         let expected = "2g82vgrZTviKG5sN1g2VM7FHgHTm16ej4gmr8ECMzab6"
-        let actual = 
-            "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
-            |> Encoding.HexStringToByteArray
-            |> Encoding.Base58Encode 
-        Assert.AreEqual(expected, actual)
+        result{
+            let! actual = "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725" |> Encoding.HexStringToByteArray
+            return Encoding.Base58Encode actual
+        } |> function
+        | Ok actual -> Assert.AreEqual(expected, actual)
+        | Error m -> Assert.Fail m
 
     [<TestMethod>]
     member this.TestBase58Decode () =

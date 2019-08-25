@@ -16,6 +16,7 @@ let RipeMD160 (array : byte[]) =
     | e -> Error (e.ToString())
 
 // Used in many places to generate checksums.
+//TODO: Move the take4 out of this function, it's misleading.
 let DoubleSha256 (address : byte[]) =
     result {
         let! firstSha = Sha256(address)
