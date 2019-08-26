@@ -11,7 +11,7 @@ This F# library provides the ability to generate bitcoin addresses using a rando
 * Pay To Script Hash Address in Hexadecimal
 * Pay To Script Hash Address in Base58
 
-## Developoment
+## Development
 
 I'm building this in Windows using Visual Studio 2017 with the .NET Core 2.2 SDK.
 Check out https://dotnet.microsoft.com/download/visual-studio-sdks to get the correct SDK for your version of Visual Studio.
