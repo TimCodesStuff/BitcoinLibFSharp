@@ -18,9 +18,8 @@ let HexToWif (isMainNetwork : bool) (isCompressedPublicKey : bool) (hex : string
         let hexWithNetworkByte = if isMainNetwork then "80" + hex else "EF" + hex
         let fullHex = if isCompressedPublicKey then hexWithNetworkByte + "01" else hexWithNetworkByte
         let! hexAsByteArray = fullHex |> HexStringToByteArray
-        let! doubleSha = hexAsByteArray |> Crypto.DoubleSha256
-        let checksum = (ByteArrayToHexString false doubleSha).Substring(0, 8);
-        let hexWithChecksum = fullHex + checksum
+        let! checksum = hexAsByteArray |> Crypto.GenerateChecksum
+        let hexWithChecksum = fullHex + (Encoding.ByteArrayToHexString false checksum)
         let! hwcheckArray = hexWithChecksum |> HexStringToByteArray
         return hwcheckArray |> Base58Encode
     }
@@ -41,8 +40,7 @@ let IsWifChecksumValid (isCompressedPublicKey : bool) (wif : string) =
             else
                 wifAddress.NetworkHex + wifAddress.PublicKey
             |> HexStringToByteArray
-        let! doubleSha = byteArray |> Crypto.DoubleSha256
-        let checksum = (doubleSha |> ByteArrayToHexString false).Substring(0,8)
-        return checksum = wifAddress.Checksum
+        let! checksum = byteArray |> Crypto.GenerateChecksum
+        return (Encoding.ByteArrayToHexString false checksum) = wifAddress.Checksum
     }
     

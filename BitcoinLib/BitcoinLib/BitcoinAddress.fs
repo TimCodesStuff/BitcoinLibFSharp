@@ -6,9 +6,7 @@ open Org.BouncyCastle.Math
 open Org.BouncyCastle.Asn1.Sec
 open Result
 open System
-open System.Linq
 open System.Security.Cryptography
-
 
 let GenerateRand256BitKey () =
     let key : byte[] = Array.zeroCreate 32
@@ -58,7 +56,7 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
         let! shaRipeHashedPublicKey = Crypto.RipeMD160 shaHashedPublicKey
     
         let payToPublicKeyAddress = Array.append [|(GetNetworkByteValue isMainNetwork)|] shaRipeHashedPublicKey
-        let! payToPublicKeyAddressChecksum = payToPublicKeyAddress |> Crypto.DoubleSha256
+        let! payToPublicKeyAddressChecksum = payToPublicKeyAddress |> Crypto.GenerateChecksum
         let payToPublicKeyAddressWithChecksum = Array.append payToPublicKeyAddress payToPublicKeyAddressChecksum
 
         let payToScriptHashAddressByte = if isMainNetwork then byte(0x05) else byte(0xc4)
@@ -66,7 +64,7 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
         let! payToScriptSha256 = payToScriptHashAddressInit |> Crypto.Sha256
         let! payToScriptHash160 =  payToScriptSha256 |> Crypto.RipeMD160
         let payToScriptHashWithoutChecksum = Array.append [| payToScriptHashAddressByte |] payToScriptHash160
-        let! payToScriptHashChecksum = payToScriptHashWithoutChecksum |> Crypto.DoubleSha256
+        let! payToScriptHashChecksum = payToScriptHashWithoutChecksum |> Crypto.GenerateChecksum
         let payToScriptHashWithChecksum = Array.append payToScriptHashWithoutChecksum payToScriptHashChecksum
 
         let metadata = {
