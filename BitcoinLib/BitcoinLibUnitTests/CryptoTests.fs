@@ -15,6 +15,4 @@ type CryptoTests () =
     [<TestMethod>]
     member this.TestGoodInputRipeMd () =
         Crypto.RipeMD160([|byte(171); byte(205)|])
-        |> function
-        | Result.Error m -> Assert.Fail m
-        | Result.Ok _ -> () // No need to test that the underlying value is correct, assume the library works correctly. 
+        |> TestHelper.FailOnError

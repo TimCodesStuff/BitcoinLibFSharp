@@ -19,13 +19,15 @@ let GenerateRandECDSACompliant256BitKey () =
     let key : byte[] = Array.zeroCreate 32
 
     let rec getKeyInBounds() =
-        rng.GetBytes(key)
-        let hexKey = (Encoding.ByteArrayToHexString false key).ToLower()
-        if (String.Compare(hexKey, upperHexLimit, true) >= 0) then
-            getKeyInBounds()
-        else
-            key
-
+        result {
+            rng.GetBytes(key)
+            let! hexKey = (Encoding.ByteArrayToHexString key)
+            if (String.Compare(hexKey.ToLower(), upperHexLimit, true) >= 0) then
+                return! getKeyInBounds()
+            else
+                return key
+        }
+        
     getKeyInBounds()
 
 let GenerateFullPublicKey (publicKeyX : byte[]) (publicKeyY : byte[]) =
@@ -88,12 +90,15 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
             p2sh_checksum = payToScriptHashChecksum;
             p2sh_addressWithChecksum = payToScriptHashWithChecksum;
         }
-        let! privateKeyWif = WifKey.HexToWif isMainNetwork true (Encoding.ByteArrayToHexString false privateKey)
+        let! privateKeyHex = privateKey |> Encoding.ByteArrayToHexString
+        let! privateKeyWif = WifKey.HexToWif isMainNetwork true privateKeyHex
+        let! publicKeyFull = metadata.publicKeyFull |> Encoding.ByteArrayToHexString
+        let! publicKeyCompressed = compressedPublicKey |> Encoding.ByteArrayToHexString
         return {
             Metadata = metadata;
-            PublicKeyFull = metadata.publicKeyFull |> Encoding.ByteArrayToHexString false;
-            PublicKeyCompressed = compressedPublicKey |> Encoding.ByteArrayToHexString false;
-            PrivateKeyHex = Encoding.ByteArrayToHexString false privateKey;
+            PublicKeyFull = publicKeyFull;
+            PublicKeyCompressed =  publicKeyCompressed;
+            PrivateKeyHex = privateKeyHex;
             PrivateKeyWIF = privateKeyWif;
             P2PKHAddress = Encoding.Base58Encode payToPublicKeyAddressWithChecksum;
             P2SHAddress = Encoding.Base58Encode payToScriptHashWithChecksum;
@@ -108,10 +113,14 @@ let GenerateBitcoinAddressRecordFromPrivateKeyHex (isMainNetwork : bool) (hex : 
 
 let GenerateBitcoinAddressRecordFromPrivateKeyWIF (isMainNetwork : bool) (wif : string) : Result<BitcoinAddressRecord, string> =
     result {
-        let! privateKey = Encoding.HexStringToByteArray (WifKey.WifToHex wif)
+        let! hex = WifKey.WifToHex wif
+        let! privateKey = Encoding.HexStringToByteArray hex
         return! GenerateBitcoinAddressRecord isMainNetwork privateKey
     }
 
 let GenerateNewRandomBitcoinAddressRecord (isMainNetwork : bool) : Result<BitcoinAddressRecord, string> =
-    let newKey = GenerateRandECDSACompliant256BitKey()
-    GenerateBitcoinAddressRecord isMainNetwork newKey
+    result {
+        let! newKey = GenerateRandECDSACompliant256BitKey()
+        return! GenerateBitcoinAddressRecord isMainNetwork newKey
+    }
+    

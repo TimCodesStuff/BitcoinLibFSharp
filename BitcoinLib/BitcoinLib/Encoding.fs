@@ -1,6 +1,5 @@
 ﻿module Encoding
 
-open Crypto
 open System
 open System.Linq
 open System.Numerics
@@ -25,10 +24,13 @@ let HexStringToByteArray (hex : string) =
         |> Ok
     | _ -> Error (sprintf "Incorrectly formatted hex string: '%s'" hex)
 
-let ByteArrayToHexString (includeDashes : bool) (byteArray : byte[]) =
-    match includeDashes with
-    | true -> BitConverter.ToString(byteArray).ToLower()
-    | false -> BitConverter.ToString(byteArray).Replace("-", "").ToLower()
+let ByteArrayToHexString (byteArray : byte[]) =
+    try Ok (BitConverter.ToString(byteArray).Replace("-", "").ToLower())
+    with | e -> Error (e.ToString())
+
+let ByteArrayToHexStringWithDashes (byteArray : byte[]) =
+    try Ok (BitConverter.ToString(byteArray).ToLower())
+    with | e -> Error (e.ToString())
 
 let ByteArrayToBigInt (array : byte[]) =
     let rec buildBigInt (bigInt : BigInteger) (arr : byte[]) =
