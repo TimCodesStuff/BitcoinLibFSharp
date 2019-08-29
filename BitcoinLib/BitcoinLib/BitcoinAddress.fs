@@ -34,10 +34,12 @@ let GenerateFullPublicKey (publicKeyX : byte[]) (publicKeyY : byte[]) =
     Array.append (Array.append [| byte(0x04); |] publicKeyX) publicKeyY
 
 let GenerateCompressedPublicKey (publicKeyX : byte[]) (publicKeyY : byte[]) =
-    if int(publicKeyY.[31]) % 2 = 0 then
-        Array.append [| byte(0x02) |] publicKeyX
+    if (publicKeyY.Length < 32) then
+        Error "Error generating compressed public key: Public Key Y value must be at least 32 bytes long."
+    elif int(publicKeyY.[31]) % 2 = 0 then
+        Ok (Array.append [| byte(0x02) |] publicKeyX)
     else
-        Array.append [| byte(0x03) |] publicKeyX
+        Ok (Array.append [| byte(0x03) |] publicKeyX)
 
 let GetSecp256k1PublicKey (privateKey : byte[]) =
     let curve = SecNamedCurves.GetByName("secp256k1")
@@ -53,7 +55,7 @@ let GetNetworkByteValue (isMainNetwork : bool) =
 let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : byte[]) =
     result {
         let (x,y) = GetSecp256k1PublicKey privateKey
-        let compressedPublicKey = GenerateCompressedPublicKey x y
+        let! compressedPublicKey = GenerateCompressedPublicKey x y
         let! shaHashedPublicKey = Crypto.Sha256 compressedPublicKey
         let! shaRipeHashedPublicKey = Crypto.RipeMD160 shaHashedPublicKey
     
