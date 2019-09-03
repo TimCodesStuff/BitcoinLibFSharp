@@ -20,24 +20,26 @@ Check out https://dotnet.microsoft.com/download/visual-studio-sdks to get the co
 
 To generate a new address from a random private key, use the following:
 ```f#
-    let newAddress = BitcoinAddress.GenerateNewRandomBitcoinAddressRecord true
+    match BitcoinAddress.GenerateNewRandomBitcoinAddressRecord true with
+    | Ok newAddress ->
+        // Outputs: Private Key: 52cd0f5bcb679d4a134cd370b023f5c4c7a9462292b82525d5839a26c2a2f671 
+        Console.WriteLine("Private Key: {0}", newAddress.PrivateKeyHex)
     
-    // Outputs: Private Key: 52cd0f5bcb679d4a134cd370b023f5c4c7a9462292b82525d5839a26c2a2f671 
-    Console.WriteLine("Private Key: {0}", newAddress.PrivateKeyHex)
-    
-    // Outputs: Public Address: 1BXC75ckkMw59hEAj4UJuJX1t1WBrdoVLm
-    Console.WriteLine("Public Address: {0}", newAddress.P2PKHAddress)
+        // Outputs: Public Address: 1BXC75ckkMw59hEAj4UJuJX1t1WBrdoVLm
+        Console.WriteLine("Public Address: {0}", newAddress.P2PKHAddress)
+    | Error message -> Console.WriteLine(message)
 ```
 
 To generate an address from a Wallet Input Format key, use the following:
 ```f#
-    let address = BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyWIF true "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
+    match BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyWIF true "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C" with
+    | Ok address ->     
+        // Outputs: Private Key: 18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725 
+        Console.WriteLine("Private Key: {0}", address.PrivateKeyHex)
     
-    // Outputs: Private Key: 18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725 
-    Console.WriteLine("Private Key: {0}", address.PrivateKeyHex)
-    
-    // Outputs: Public Address: 1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs
-    Console.WriteLine("Public Address: {0}", address.P2PKHAddress)
+        // Outputs: Public Address: 1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs
+        Console.WriteLine("Public Address: {0}", address.P2PKHAddress)
+    | Error message -> Console.WriteLine(message)
 ```
 
 ## Future Work
