@@ -14,7 +14,6 @@ let WifToHex (wif : string) =
         // Remove first byte (network byte) and last 4 bytes (checksum)
         return hex.Substring(2, 64) 
     }
-    
 
 let HexToWif (isMainNetwork : bool) (isCompressedPublicKey : bool) (hex : string) =
     result{

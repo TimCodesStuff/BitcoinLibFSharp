@@ -52,7 +52,7 @@ let GetSecp256k1PublicKey (privateKey : byte[]) =
 let GetNetworkByteValue (isMainNetwork : bool) =
     if isMainNetwork then byte(0x00) else  byte(0x6f)
 
-let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : byte[]) =
+let private generateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : byte[]) =
     result {
         let (x,y) = GetSecp256k1PublicKey privateKey
         let! compressedPublicKey = GenerateCompressedPublicKey x y
@@ -110,19 +110,19 @@ let private GenerateBitcoinAddressRecord (isMainNetwork : bool) (privateKey : by
 let GenerateBitcoinAddressRecordFromPrivateKeyHex (isMainNetwork : bool) (hex : string) : Result<BitcoinAddressRecord, string> =
     result {
         let! privateKey = Encoding.HexStringToByteArray hex
-        return! GenerateBitcoinAddressRecord isMainNetwork privateKey
+        return! generateBitcoinAddressRecord isMainNetwork privateKey
     }
 
 let GenerateBitcoinAddressRecordFromPrivateKeyWIF (isMainNetwork : bool) (wif : string) : Result<BitcoinAddressRecord, string> =
     result {
         let! hex = WifKey.WifToHex wif
         let! privateKey = Encoding.HexStringToByteArray hex
-        return! GenerateBitcoinAddressRecord isMainNetwork privateKey
+        return! generateBitcoinAddressRecord isMainNetwork privateKey
     }
 
 let GenerateNewRandomBitcoinAddressRecord (isMainNetwork : bool) : Result<BitcoinAddressRecord, string> =
     result {
         let! newKey = GenerateRandECDSACompliant256BitKey()
-        return! GenerateBitcoinAddressRecord isMainNetwork newKey
+        return! generateBitcoinAddressRecord isMainNetwork newKey
     }
     
