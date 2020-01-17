@@ -4,15 +4,14 @@ open System
 open System.Linq
 open System.Numerics
 
-let private HexCharSet = "0123456789ABCDEF"
+let private hexCharSet = "0123456789ABCDEF"
 
 let (|Hex|_|) (str: string) =
     str.ToUpper()
-    |> Seq.filter (fun c -> not (Set.ofSeq(HexCharSet).Contains c))
-    |> Seq.isEmpty
+    |> Seq.exists (fun c -> not (Set.ofSeq(hexCharSet).Contains c))
     |> function
-    | true -> Some()
-    | false -> None
+    | true -> None // Found non-hex chars in string
+    | false -> Some () // All chars are hex
 
 let HexStringToByteArray (hex : string) =
     match hex with
@@ -44,7 +43,7 @@ let ByteArrayToBigInt (array : byte[]) =
     buildBigInt (bigint 0) array
 
 // Base 58 contains no 0, O, l, or I.
-let private Base58CharSet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+let private base58CharSet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 let Base58Encode (array : byte[]) =
     let arrayAsBigInt = ByteArrayToBigInt array
 
@@ -53,7 +52,7 @@ let Base58Encode (array : byte[]) =
     let rec countLeadingZeros (byteArr : byte seq) (zeroCount : int) =
         let firstByte =  byteArr |> Seq.head
         let tail = byteArr |> Seq.tail
-        if not (firstByte = byte(0)) then
+        if firstByte <> byte(0) then
             zeroCount
         else
             let newCount = zeroCount + 1 
@@ -64,7 +63,7 @@ let Base58Encode (array : byte[]) =
             base58Encoded
         else
             let charSetIndex = number % bigint(58)
-            let newChar = Base58CharSet.[int(charSetIndex)]
+            let newChar = base58CharSet.[int(charSetIndex)]
             let encodedString = (string)newChar + base58Encoded
             let num = number / bigint(58)
             encode num encodedString
@@ -82,7 +81,7 @@ let Base58StringToBigInt (base58String : string) =
         else
             let firstChar = Seq.head base58str
             let tailChars = Seq.tail base58str |> String.Concat
-            let firstCharVal = Base58CharSet.IndexOf firstChar
+            let firstCharVal = base58CharSet.IndexOf firstChar
             let tempBigInt = (bigInt * bigint(58)) + bigint(firstCharVal)
             buildBigIntFromString tailChars tempBigInt
 
@@ -92,7 +91,7 @@ let Base58Decode (base58Str : string) =
     let rec convertLeadingOnesToZeros (str : string) (zeros : byte[]) =
         let firstChar =  str |> Seq.head
         let tail = str |> Seq.tail |> String.Concat
-        if not (firstChar = '1') then
+        if firstChar <> '1' then
             zeros
         else
             let newArray =  Array.append [|byte(0)|] zeros
