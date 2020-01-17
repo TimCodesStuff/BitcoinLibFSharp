@@ -1,6 +1,6 @@
 # BitcoinLibFSharp
 
-This F# library provides the ability to generate bitcoin addresses using a randomly generated private key or your own private key. Your own private key can be supplied in raw binary form, hexadecimal format, or Wallet Input Format (WIF). The library provides information about the address, including: 
+This F# library provides the ability to generate bitcoin addresses using a randomly generated private key or your own private key. Your own private key can be supplied in raw binary form, hexadecimal format, or Wallet Input Format (WIF). The library provides information about the address including: 
 * Private Key in Hexadecimal
 * Private Key in Wallet Input Format
 * Public Key Compressed
@@ -13,34 +13,53 @@ This F# library provides the ability to generate bitcoin addresses using a rando
 
 ## Development
 
-I'm building this in Windows using Visual Studio 2017 with the .NET Core 2.2 SDK.
+I'm building this in Windows using Visual Studio 2019 with the .NET Core 2.2 SDK.
 Check out https://dotnet.microsoft.com/download/visual-studio-sdks to get the correct SDK for your version of Visual Studio.
 
 ## Usage
 
-To generate a new address from a random private key, use the following:
+To generate a new address from a random private key, you can call the `GenerateNewRandomBitcoinAddressRecord` function, which will return a `Result` type. Decompose the result to access the newly generated address record (or the error string if there was an error).
 ```f#
-    match BitcoinAddress.GenerateNewRandomBitcoinAddressRecord true with
-    | Ok newAddress ->
-        // Outputs: Private Key: 52cd0f5bcb679d4a134cd370b023f5c4c7a9462292b82525d5839a26c2a2f671 
-        Console.WriteLine("Private Key: {0}", newAddress.PrivateKeyHex)
+    // Returns a new BitcoinAddressRecord Result
+    let newAddressRecord = BitcoinAddress.GenerateNewRandomBitcoinAddressRecord true
     
-        // Outputs: Public Address: 1BXC75ckkMw59hEAj4UJuJX1t1WBrdoVLm
-        Console.WriteLine("Public Address: {0}", newAddress.P2PKHAddress)
-    | Error message -> Console.WriteLine(message)
+    // Decompose Result
+    match newAddressRecord with
+    | Ok newAddress ->
+        printfn "Generating new bitcoin address from a random private key..."
+        printfn "Private Key: %s" newAddress.PrivateKeyHex
+        printfn "Public Address: %s" newAddress.P2PKHAddress
+    | Error message -> printfn  "Error generating bitcoin address: %s" message
+```
+This example will output the following:
+
+(NOTE: Do not send bitcoin to these addresses! The private keys are clearly exposed here and anyone can use these addresses.)
+
+![alt text](./ReadmeImages/SampleOutput1.PNG)
+
+If you have your own private key, you can generate an address with one of the following functions depending on what format your private key is stored in:
+* `GenerateBitcoinAddressRecordFromPrivateKeyWIF`
+* `GenerateBitcoinAddressRecordFromPrivateKeyHx`
+
+Here's an example using a WIF key:
+```f#
+    // Returns a new BitcoinAddressRecord Result
+    let wifPrivateKey = "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C"
+    let addressRecord = BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyWIF true wifPrivateKey
+    
+    // Decompose Result
+    match addressRecord with
+    | Ok address ->     
+        printfn "Generating bitcoin address from the private key '%s ..." wifPrivateKey
+        printfn "Private Key (WIF): %s" address.PrivateKeyWIF
+        printfn "Private Key (Hex): %s" address.PrivateKeyHex
+        printfn "Public Address: %s" address.P2PKHAddress
+    | Error message ->  printfn  "Error generating bitcoin address: %s" message
 ```
 
-To generate an address from a Wallet Input Format key, use the following:
-```f#
-    match BitcoinAddress.GenerateBitcoinAddressRecordFromPrivateKeyWIF true "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C" with
-    | Ok address ->     
-        // Outputs: Private Key: 18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725 
-        Console.WriteLine("Private Key: {0}", address.PrivateKeyHex)
-    
-        // Outputs: Public Address: 1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs
-        Console.WriteLine("Public Address: {0}", address.P2PKHAddress)
-    | Error message -> Console.WriteLine(message)
-```
+And the output generated:
+
+![alt text](./ReadmeImages/SampleOutput2.PNG)
 
 ## Future Work
 The things I plan on implementing next include:
